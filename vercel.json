@@ -1,0 +1,42 @@
+{
+  "buildCommand": "node scripts/build.js",
+  "outputDirectory": "public",
+  "functions": {
+    "api/**/*.js": { "runtime": "nodejs20.x" }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options",            "value": "nosniff" },
+        { "key": "X-Frame-Options",                   "value": "SAMEORIGIN" },
+        { "key": "X-XSS-Protection",                  "value": "1; mode=block" },
+        { "key": "Referrer-Policy",                   "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy",                "value": "geolocation=(), microphone=(), camera=()" },
+        { "key": "Strict-Transport-Security",         "value": "max-age=63072000; includeSubDomains; preload" }
+      ]
+    },
+    {
+      "source": "/js/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/style.css",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "X-Robots-Tag",  "value": "noindex" }
+      ]
+    }
+  ],
+  "redirects": [
+    { "source": "/index.html", "destination": "/", "permanent": true }
+  ],
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/:path*" },
+    { "source": "/(.*)",       "destination": "/index.html" }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "senna",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.js",
+    "dev": "node scripts/dev.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  }
+}
