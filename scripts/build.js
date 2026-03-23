@@ -1,6 +1,7 @@
 // scripts/build.js
-// Runs at Vercel build time. Injects the PUBLISHABLE key only.
-// The SECRET key never leaves this file — it's used only in api/*.js serverless functions.
+// Runs at Vercel build time via `npm run build`.
+// Writes public/env.js with the PUBLISHABLE key only.
+// The SECRET key stays in api/*.js serverless functions only.
 
 const fs   = require('fs')
 const path = require('path')
@@ -8,19 +9,17 @@ const path = require('path')
 const PUBLISHABLE = process.env.SUPABASE_PUBLISHABLE_KEY || ''
 const URL_KEY     = process.env.SUPABASE_URL             || ''
 
-if (!PUBLISHABLE) {
-  console.warn('[build] WARNING: SUPABASE_PUBLISHABLE_KEY is not set.')
+if (!PUBLISHABLE || !URL_KEY) {
+  console.error('[build] ERROR: SUPABASE_PUBLISHABLE_KEY and SUPABASE_URL must be set as environment variables.')
+  console.error('[build] Go to Vercel → Project → Settings → Environment Variables and add them.')
+  process.exit(1)
 }
 
-// Write the env shim that the browser loads
-const envContent = `(function(){
-  window.__ENV__ = {
-    SUPABASE_URL: ${JSON.stringify(URL_KEY)},
-    SUPABASE_KEY: ${JSON.stringify(PUBLISHABLE)}
-  };
-})();
-`
+const envContent = `(function(){window.__ENV__={SUPABASE_URL:${JSON.stringify(URL_KEY)},SUPABASE_KEY:${JSON.stringify(PUBLISHABLE)}};})();\n`
 
-const out = path.join(__dirname, '..', 'public', 'env.js')
+const outDir = path.join(__dirname, '..', 'public')
+if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true })
+
+const out = path.join(outDir, 'env.js')
 fs.writeFileSync(out, envContent, 'utf8')
-console.log('[build] env.js written →', out)
+console.log('[build] env.js written successfully.')
