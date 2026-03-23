@@ -138,7 +138,7 @@ registerRoute("/admin", async (app) => {
                 .slice(0, 2)
                 .map(
                   (v) =>
-                    `<span class="badge b-pen" style="font-size:.7rem">${esc(sufLabel(v))}</span>`,
+                    `<span class="badge b-neu" style="font-size:.7rem">${esc(sufLabel(v))}</span>`,
                 )
                 .join("") +
               (types.length > 2
@@ -222,7 +222,7 @@ registerRoute("/admin", async (app) => {
     const lang = getLang();
     const types = Array.isArray(r.suffering_types) ? r.suffering_types : [];
     const tags = types
-      .map((v) => `<span class="badge b-pen">${esc(sufLabel(v))}</span>`)
+      .map((v) => `<span class="badge b-neu">${esc(sufLabel(v))}</span>`)
       .join(" ");
     showModal({
       title: r.full_name,

@@ -205,7 +205,7 @@ registerRoute("/doctor/dash", async (app) => {
         .slice(0, 2)
         .map(
           (v) =>
-            `<span class="badge b-pen" style="font-size:.7rem">${esc(sufLabel(v))}</span>`,
+            `<span class="badge b-neu" style="font-size:.7rem">${esc(sufLabel(v))}</span>`,
         )
         .join("") +
       (types.length > 2
@@ -379,7 +379,7 @@ registerRoute("/doctor/dash", async (app) => {
           <p class="ii-lbl claim-request-label">${lang === "ar" ? "الطلب" : "Request"}</p>
           <div class="claim-request-row">
             <span class="claim-request-name">${esc(r.full_name)}</span>
-            <span class="badge b-pen" style="font-size:0.7rem">${esc(r.patient_id)}</span>
+            <span class="badge b-neu" style="font-size:0.7rem">${esc(r.patient_id)}</span>
           </div>
         </div>
 
@@ -499,7 +499,7 @@ registerRoute("/doctor/dash", async (app) => {
       locked = isLocked(r.id) && !acc;
     const types = Array.isArray(r.suffering_types) ? r.suffering_types : [];
     const tags = types
-      .map((v) => `<span class="badge b-pen">${esc(sufLabel(v))}</span>`)
+      .map((v) => `<span class="badge b-neu">${esc(sufLabel(v))}</span>`)
       .join(" ");
     const fullInfoHTML = acc
       ? `<div><p class="ii-lbl">${esc(t("doc.phone"))}</p><p class="ii-val mono" dir="ltr">${esc(r.phone)}</p></div><div><p class="ii-lbl">${esc(t("doc.nid"))}</p><p class="ii-val mono" dir="ltr">${esc(r.national_id_num)}</p></div>`
