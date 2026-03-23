@@ -4,19 +4,94 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
     <title>سِنّة</title>
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; img-src 'self' data: blob: https://*.supabase.co; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self';"
-    />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23171717'/><path d='M11 8c-2.2 0-4 1.8-4 4 0 1.5.7 2.5.7 4.5C7.7 19 7 22 7 23.5c0 .8.7 1.5 1.5 1.5h15c.8 0 1.5-.7 1.5-1.5 0-1.5-.7-4.5-.7-7 0-2 .7-3 .7-4.5 0-2.2-1.8-4-4-4-1.4 0-2.6.7-3.3 1.8C17.9 8.7 16.7 8 15.3 8H11z' fill='white'/></svg>" />
     <link rel="stylesheet" href="style.css" />
+
+    <!-- Load Supabase + DOMPurify from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js" crossorigin="anonymous"></script>
-    <!-- env.js is generated at build time — contains publishable key only -->
-    <script src="env.js"></script>
+
+    <!--
+      BOOT SEQUENCE:
+      1. Fetch /api/config → sets window.__ENV__ with publishable key (server-injected at runtime)
+      2. Only then load the rest of the app scripts
+      This means no build step, no env.js file, no placeholder tokens.
+    -->
+    <script>
+      (function () {
+        function showFatal(msg) {
+          document.getElementById('app').innerHTML =
+            '<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:2rem">' +
+            '<div style="max-width:400px;text-align:center;font-family:system-ui,sans-serif">' +
+            '<p style="font-size:1rem;font-weight:600;color:#ef4444;margin-bottom:.5rem">Failed to start</p>' +
+            '<p style="color:#737373;font-size:.875rem;margin-bottom:1rem">' + msg + '</p>' +
+            '<button onclick="location.reload()" style="padding:.5rem 1.25rem;background:#171717;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit">Reload</button>' +
+            '</div></div>';
+        }
+
+        function loadScript(src) {
+          return new Promise(function (resolve, reject) {
+            var s = document.createElement('script');
+            s.src = src;
+            s.onload = resolve;
+            s.onerror = function () { reject(new Error('Failed to load: ' + src)); };
+            document.body.appendChild(s);
+          });
+        }
+
+        var APP_SCRIPTS = [
+          'js/config.js',
+          'js/icons.js',
+          'js/i18n.js',
+          'js/utils.js',
+          'js/db.js',
+          'js/auth.js',
+          'js/ui.js',
+          'js/components.js',
+          'js/router.js',
+          'js/pages/landing.js',
+          'js/pages/login.js',
+          'js/pages/signup.js',
+          'js/pages/patient.js',
+          'js/pages/doctor-dash.js',
+          'js/pages/doctor-profile.js',
+          'js/pages/admin-dash.js',
+          'js/pages/admin-doctors.js',
+          'js/pages/admin-requests.js',
+          'js/main.js'
+        ];
+
+        function loadAllScripts() {
+          return APP_SCRIPTS.reduce(function (p, src) {
+            return p.then(function () { return loadScript(src); });
+          }, Promise.resolve());
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+          fetch('/api/config')
+            .then(function (r) {
+              if (!r.ok) return r.json().then(function (d) { throw new Error(d.error || 'Config fetch failed (' + r.status + ')'); });
+              return r.text();
+            })
+            .then(function (js) {
+              // Execute the JS returned by /api/config — sets window.__ENV__
+              // eslint-disable-next-line no-new-func
+              (new Function(js))();
+              if (!window.__ENV__ || !window.__ENV__.SUPABASE_KEY) {
+                throw new Error('Config loaded but SUPABASE_KEY is empty. Check Vercel env vars.');
+              }
+              return loadAllScripts();
+            })
+            .catch(function (err) {
+              console.error('[boot]', err);
+              showFatal(err.message);
+            });
+        });
+      })();
+    </script>
   </head>
   <body>
     <div id="nb"></div>
@@ -26,25 +101,5 @@
     <div id="bnav"></div>
     <div id="toasts"></div>
     <div id="modals"></div>
-
-    <script src="js/config.js"></script>
-    <script src="js/icons.js"></script>
-    <script src="js/i18n.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/db.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/components.js"></script>
-    <script src="js/router.js"></script>
-    <script src="js/pages/landing.js"></script>
-    <script src="js/pages/login.js"></script>
-    <script src="js/pages/signup.js"></script>
-    <script src="js/pages/patient.js"></script>
-    <script src="js/pages/doctor-dash.js"></script>
-    <script src="js/pages/doctor-profile.js"></script>
-    <script src="js/pages/admin-dash.js"></script>
-    <script src="js/pages/admin-doctors.js"></script>
-    <script src="js/pages/admin-requests.js"></script>
-    <script src="js/main.js"></script>
   </body>
 </html>
